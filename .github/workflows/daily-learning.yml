@@ -1,0 +1,47 @@
+name: Daily Learning Update
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 6 AM UTC (11:30 AM IST)
+  workflow_dispatch:
+
+jobs:
+  update-diary:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Configure Git
+        run: |
+          git config --global user.name 'sagarmajumder2021-afk'
+          git config --global user.email 'airelatedworkuse@gmail.com'
+          
+      - name: Update Learning Log
+        run: |
+          echo "" >> daily-log.md
+          echo "### Update - $(date +'%Y-%m-%d')" >> daily-log.md
+          echo "- ✅ Daily learning session completed" >> daily-log.md
+          echo "- 📚 Continued AI/ML studies" >> daily-log.md
+          echo "- 💡 New insights gained" >> daily-log.md
+          echo "" >> daily-log.md
+          
+      - name: Update Statistics
+        run: |
+          TOTAL_DAYS=$(grep -c "Day [0-9]" daily-log.md || echo "1")
+          echo "📊 Total Learning Days: $TOTAL_DAYS" > stats.txt
+          echo "📅 Last Updated: $(date)" >> stats.txt
+          echo "🎯 Goal: Master AI/ML" >> stats.txt
+          echo "💚 Status: Active learner" >> stats.txt
+          
+      - name: Commit and Push
+        run: |
+          git add .
+          git diff --quiet && git diff --staged --quiet || (git commit -m "📚 Daily learning update - $(date +'%Y-%m-%d')" && git push)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
